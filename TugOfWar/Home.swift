@@ -9,58 +9,121 @@ import UIKit
 
 class Home: UIViewController {
     let client = WebSocketClient()
-    let textBox = UITextField()
-    let textBox2 = UITextField()
-    
+    let game = Game()
+    let playerID: String? = "A" //set to nothing after testing
+    let scoreStack = UIStackView()
+    let buttonStack = UIStackView()
+    let score1 = TWScore(color: .systemPink)
+    let score2 = TWScore(color: .systemTeal)
+    let button1 = UIButton(type: .system)
+    let button2 = UIButton(type: .system)
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemPink
         
-        view.addSubview(textBox)
-        textBox.translatesAutoresizingMaskIntoConstraints = false
-        textBox.backgroundColor = .systemCyan
-        NSLayoutConstraint.activate([
-            textBox.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            textBox.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            textBox.heightAnchor.constraint(equalToConstant: 200),
-            textBox.widthAnchor.constraint(equalToConstant: 300)])
-        
-        view.addSubview(textBox2)
-        textBox2.translatesAutoresizingMaskIntoConstraints = false
-        textBox2.backgroundColor = .white
-        textBox2.textColor = .black
-        NSLayoutConstraint.activate([
-            textBox2.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            textBox2.topAnchor.constraint(equalTo: textBox.bottomAnchor),
-            textBox2.heightAnchor.constraint(equalToConstant: 200),
-            textBox2.widthAnchor.constraint(equalToConstant: 300)])
-        
-        createDismissKeywordTapGesture()
-        
-        textBox.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        
-        client.connect{ message in
-            DispatchQueue.main.async {
-                self.textBox2.text = message
+        client.connect{data in
+            if let opponentScore = Int(data) {
+                DispatchQueue.main.async{
+                    self.updateOpponentScore(opponentScore)
+                }
+            } else {
+                print("received something else")
             }
         }
         
+        view.backgroundColor = .systemBackground
+        configureScores()
+        configureButtons()
+    }
+    
+    func configureScores() {
+        view.addSubview(scoreStack)
+        scoreStack.addArrangedSubview(score1)
+        scoreStack.addArrangedSubview(score2)
         
-        client.send(text: "hello world")
+        scoreStack.axis = .horizontal
+        scoreStack.spacing = 10
+        score1.text = String(game.scoreA)
+        score2.text = String(game.scoreA)
+        
+        scoreStack.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            scoreStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            scoreStack.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
     }
     
-    @objc func textFieldDidChange(_ textField: UITextField) {
-        print("Text changed:", textField.text ?? "")
-        client.send(text: textField.text ?? "")
+    func configureButtons() {
+        view.addSubview(buttonStack)
+        buttonStack.addArrangedSubview(button1)
+        buttonStack.addArrangedSubview(button2)
+        
+        buttonStack.axis = .horizontal
+        buttonStack.spacing = 10
+        
+        buttonStack.translatesAutoresizingMaskIntoConstraints = false
+        button1.translatesAutoresizingMaskIntoConstraints = false
+        button2.translatesAutoresizingMaskIntoConstraints = false
+        
+        button1.backgroundColor = .systemPink
+        button2.backgroundColor = .systemTeal
+        
+        button1.setTitle("A", for: .normal)
+        button2.setTitle("B", for: .normal)
+        button1.setTitleColor(.white, for: .normal)
+        button2.setTitleColor(.white, for: .normal)
+        
+        if (playerID == "A") {
+            button1.addTarget(self, action: #selector(updatePlayerScore), for: .touchUpInside)
+            button2.isUserInteractionEnabled = false
+        } else {
+            button2.addTarget(self, action: #selector(updatePlayerScore), for: .touchUpInside)
+            button1.isUserInteractionEnabled = false
+        }
+        
+        NSLayoutConstraint.activate([
+            buttonStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            buttonStack.topAnchor.constraint(equalTo: scoreStack.bottomAnchor, constant: 50),
+            button1.widthAnchor.constraint(equalToConstant: 100),
+            button1.heightAnchor.constraint(equalToConstant: 100),
+            button2.widthAnchor.constraint(equalToConstant: 100),
+            button2.heightAnchor.constraint(equalToConstant: 100),
+        ])
     }
     
+    @objc func updatePlayerScore(_ sender: UIButton) {
+        game.scoreA += 1
+        
+        guard let data = try? JSONSerialization.data(withJSONObject: ["player": "A", "score": game.scoreA]),
+              let jsonString = String(data: data, encoding: .utf8) else {
+            print("player score can't send")
+            return
+        }
+        
+        client.send(text: jsonString)
+        updateUI()
+    }
     
+    func updateOpponentScore(_ score: Int) {
+        if (playerID != "A") {
+            game.scoreA = score
+        } else {
+            game.scoreB = score
+        }
+        updateUI()
+    }
 
-    
-    func createDismissKeywordTapGesture() {
-        let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
-        view.addGestureRecognizer(tap)
+    func updateUI(){
+        score1.text = String(game.scoreA)
+        score2.text = String(game.scoreB)
     }
+
+//
+//    func createDismissKeywordTapGesture() {
+//        let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
+//        view.addGestureRecognizer(tap)
+//    }
     
     
 }

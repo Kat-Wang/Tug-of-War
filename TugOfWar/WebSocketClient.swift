@@ -10,15 +10,13 @@ import Foundation
 class WebSocketClient {
     private var webSocketTask: URLSessionWebSocketTask?
     
-    
     func connect(onMessage:  @escaping (String) -> Void) {
-        let url = URL(string: "ws://localhost:80")! 
+        let url = URL(string: "ws://localhost:8080")! 
         let session = URLSession(configuration: .default)
         webSocketTask = session.webSocketTask(with: url)
         webSocketTask?.resume()
         
         receive(onMessage: onMessage)
-        
     }
 
     func receive(onMessage:  @escaping (String) -> Void) {
@@ -39,7 +37,6 @@ class WebSocketClient {
             }
             self.receive(onMessage: onMessage)
         }
-        
     }
 
     func send(text: String) {
