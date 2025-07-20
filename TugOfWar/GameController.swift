@@ -7,7 +7,7 @@
 
 import UIKit
 
-class Home: UIViewController {
+class GameController: UIViewController {
     let client = WebSocketClient()
     let game = Game()
     let playerID: String? = "A" //set to nothing after testing
@@ -118,13 +118,6 @@ class Home: UIViewController {
         score1.text = String(game.scoreA)
         score2.text = String(game.scoreB)
     }
-
-//
-//    func createDismissKeywordTapGesture() {
-//        let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
-//        view.addGestureRecognizer(tap)
-//    }
-    
     
 }
 

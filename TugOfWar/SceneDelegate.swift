@@ -20,7 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
-        window?.rootViewController = Home()
+        window?.rootViewController = NewLobbyController()
         window?.makeKeyAndVisible()
     }
 
@@ -55,3 +55,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 }
 
+//extension UIApplication {
+//    func addTapGestureRecognizer() {
+//        guard let windowScene = connectedScenes.first(where: {$0.activationState == .foregroundActive}) as? UIWindowScene,
+//              let window = windowScene.windows.first,
+//        let rootView = window.rootViewController?.view else { return }
+//        
+//        let tapGesture = UITapGestureRecognizer(target: window, action: #selector(UIView.endEditing))
+//        tapGesture.requiresExclusiveTouchType = false
+//        tapGesture.cancelsTouchesInView = false
+//        tapGesture.delegate = TapGestureHandler.shared
+//        window.addGestureRecognizer(tapGesture)
+//    }
+//}

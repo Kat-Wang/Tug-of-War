@@ -11,7 +11,8 @@ class WebSocketClient {
     private var webSocketTask: URLSessionWebSocketTask?
     
     func connect(onMessage:  @escaping (String) -> Void) {
-        let url = URL(string: "ws://localhost:8080")! 
+//        let url = URL(string: "wss://tug-of-war-server.onrender.com")!
+        let url = URL(string: "ws://localhost:8080")!
         let session = URLSession(configuration: .default)
         webSocketTask = session.webSocketTask(with: url)
         webSocketTask?.resume()
